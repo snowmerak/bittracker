@@ -61,8 +61,6 @@ func TestBitTracker_GetRange(t *testing.T) {
 		{0b11110000, 0b00001010},
 		{0b10111111, 0b11100000, 0b00010000},
 	}
-	t.Log("tests", tests)
-	t.Log("corrects", corrects)
 
 	for i, test := range tests {
 		result := bt.GetRange(test[0], test[1])
