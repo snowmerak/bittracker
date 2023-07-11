@@ -1,5 +1,7 @@
 package bittracker
 
+import "math/bits"
+
 const (
 	mask1 = uint8(0b10000000)
 	mask2 = uint8(0b11000000)
@@ -158,11 +160,20 @@ func (bt *BitTracker) LeadingZeros(offset int) (count int) {
 
 loop:
 	for {
-		for i := bitIndex; i < 8; i++ {
-			if bt.data[byteIndex]&(1<<uint(7-i)) != 0 {
+		switch bitIndex {
+		case 0:
+			t := bits.LeadingZeros8(bt.data[byteIndex])
+			count += t
+			if t != 8 {
 				break loop
 			}
-			count++
+		default:
+			for i := bitIndex; i < 8; i++ {
+				if bt.data[byteIndex]&(1<<uint(7-i)) != 0 {
+					break loop
+				}
+				count++
+			}
 		}
 
 		byteIndex++
