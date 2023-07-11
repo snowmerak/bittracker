@@ -76,3 +76,17 @@ func TestBitTracker_GetRange(t *testing.T) {
 		}
 	}
 }
+
+func TestBitTracker_LeadingZeros(t *testing.T) {
+	bt := bittracker.NewBitTracker([]byte{0b01010101, 0b11111111, 0b00000000, 0b10101010})
+
+	tests := []int{0, 5, 13, 19, 26, 27, 31}
+	corrects := []int{1, 0, 0, 5, 0, 1, 1}
+
+	for i, test := range tests {
+		result := bt.LeadingZeros(test)
+		if result != corrects[i] {
+			t.Errorf("Test %d Expected %d, got %d", i, corrects[i], result)
+		}
+	}
+}
