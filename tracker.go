@@ -95,13 +95,16 @@ func (bt *BitTracker) GetRange(start, end int) []byte {
 	result := make([]byte, resultLength)
 	// copy from start bit index in start byte index until end bit index in end byte index to result
 	for {
-		min := sourceBitIndex
-		if min < targetBitIndex {
-			min = targetBitIndex
+		min := 8 - sourceBitIndex
+		if min > 8-targetBitIndex {
+			min = 8 - targetBitIndex
+		}
+		if remains < min {
+			min = remains
 		}
 
 		mask := uint8(0)
-		switch 8 - min {
+		switch min {
 		case 0:
 			mask = 0
 		case 1:
@@ -121,9 +124,9 @@ func (bt *BitTracker) GetRange(start, end int) []byte {
 		case 8:
 			mask = mask8
 		}
-		result[targetByteIndex] |= (bt.data[sourceByteIndex] << min & mask) >> targetBitIndex
+		result[targetByteIndex] |= (bt.data[sourceByteIndex] << sourceBitIndex & mask) >> targetBitIndex
 
-		remains -= 8 - min
+		remains -= min
 		if remains <= 0 {
 			break
 		}
