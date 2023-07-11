@@ -30,12 +30,9 @@ func (bt *BitTracker) GetBit(index int) bool {
 	}
 
 	byteIndex := index / 8
-	bitIndex := index%8 - 1
-	if bitIndex < 0 {
-		bitIndex = 7
-	}
+	bitIndex := index % 8
 
-	return bt.data[byteIndex]&(1<<uint(bitIndex)) != 0
+	return bt.data[byteIndex]&(1<<uint(7-bitIndex)) != 0
 }
 
 // SetBit sets the bit at the given index.
@@ -45,15 +42,12 @@ func (bt *BitTracker) SetBit(index int, value bool) {
 	}
 
 	byteIndex := index / 8
-	bitIndex := index%8 - 1
-	if bitIndex < 0 {
-		bitIndex = 7
-	}
+	bitIndex := index % 8
 
 	if value {
-		bt.data[byteIndex] |= 1 << uint(bitIndex)
+		bt.data[byteIndex] |= 1 << uint(7-bitIndex)
 	} else {
-		bt.data[byteIndex] &= ^(1 << uint(bitIndex))
+		bt.data[byteIndex] &= ^(1 << uint(7-bitIndex))
 	}
 }
 
@@ -66,7 +60,7 @@ func (bt *BitTracker) ToggleBit(index int) {
 	byteIndex := index / 8
 	bitIndex := index % 8
 
-	bt.data[byteIndex] ^= 1 << uint(bitIndex)
+	bt.data[byteIndex] ^= 1 << uint(7-bitIndex)
 }
 
 // GetRange returns the []byte in the given range.
@@ -151,4 +145,33 @@ func (bt *BitTracker) GetRange(start, end int) []byte {
 	}
 
 	return result
+}
+
+// LeadingZeros returns the number of leading zeros from the given offset.
+func (bt *BitTracker) LeadingZeros(offset int) (count int) {
+	if offset < 0 || offset >= len(bt.data)*8 {
+		return 0
+	}
+
+	byteIndex := offset / 8
+	bitIndex := offset % 8
+
+loop:
+	for {
+		for i := bitIndex; i < 8; i++ {
+			if bt.data[byteIndex]&(1<<uint(7-i)) != 0 {
+				break loop
+			}
+			count++
+		}
+
+		byteIndex++
+		bitIndex = 0
+
+		if byteIndex >= len(bt.data) {
+			break
+		}
+	}
+
+	return
 }
