@@ -30,7 +30,10 @@ func (bt *BitTracker) GetBit(index int) bool {
 	}
 
 	byteIndex := index / 8
-	bitIndex := index % 8
+	bitIndex := index%8 - 1
+	if bitIndex < 0 {
+		bitIndex = 7
+	}
 
 	return bt.data[byteIndex]&(1<<uint(bitIndex)) != 0
 }
@@ -42,7 +45,10 @@ func (bt *BitTracker) SetBit(index int, value bool) {
 	}
 
 	byteIndex := index / 8
-	bitIndex := index % 8
+	bitIndex := index%8 - 1
+	if bitIndex < 0 {
+		bitIndex = 7
+	}
 
 	if value {
 		bt.data[byteIndex] |= 1 << uint(bitIndex)
@@ -67,11 +73,11 @@ func (bt *BitTracker) ToggleBit(index int) {
 // The range is inclusive.
 // If the range is invalid, it returns nil.
 func (bt *BitTracker) GetRange(start, end int) []byte {
-	if start < 0 || start >= len(bt.data)*8 {
+	if start < 0 || start > len(bt.data)*8 {
 		return nil
 	}
 
-	if end < 0 || end >= len(bt.data)*8 {
+	if end < 0 || end > len(bt.data)*8 {
 		return nil
 	}
 
@@ -79,7 +85,7 @@ func (bt *BitTracker) GetRange(start, end int) []byte {
 		return nil
 	}
 
-	remains := end - start + 1
+	remains := end - start
 
 	sourceByteIndex := start / 8
 	sourceBitIndex := start % 8
